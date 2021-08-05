@@ -1,8 +1,6 @@
 from fastapi import FastAPI
-import uvicorn
-
-from app.control.schemas import GroupBody, FacultyBody, CourseBody, FormBody, UserBody
-from app.servise import faculty_servises, course_servises, form_servises, user_servises, group_servises
+from api.schemas import GroupBody, FacultyBody, CourseBody, FormBody, UserBody
+from servise import faculty_servises, course_servises, form_servises, user_servises, group_servises
 
 app = FastAPI()
 
@@ -11,7 +9,7 @@ app = FastAPI()
 
 @app.get("/faculties/all")
 async def faculty():
-    return faculty_servises.get_all_faculties()
+    return faculty_servises.get_all_faculties("name")
 
 
 @app.get("/courses/all")
@@ -73,6 +71,13 @@ def user(id: int):
 
 
 """post requests"""
+
+
+@app.post("/faculties/list")
+def faculty(bodies: list[FacultyBody]):
+    names = [body.name for body in bodies]
+    result = faculty_servises.post_list_of_faculties(names)
+    return {"result": result}
 
 
 @app.post("/faculties")
@@ -208,12 +213,3 @@ def group(id: int):
 def user(id: int):
     result = user_servises.delete_user(id)
     return {"result": result}
-
-
-if __name__ == "__main__":
-    uvicorn.run(
-        "control:app",
-        host='localhost',
-        port=8000,
-        reload=True
-    )

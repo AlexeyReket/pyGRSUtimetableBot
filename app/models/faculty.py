@@ -1,8 +1,7 @@
 from sqlalchemy import Integer, String, Column
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-Base = declarative_base()
+from main import Base
 
 
 class Faculty(Base):

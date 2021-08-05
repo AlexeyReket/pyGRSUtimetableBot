@@ -1,7 +1,7 @@
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
-from app.models.form import Form
+from models.form import Form
 
 engine = create_engine("sqlite:///data.db")
 Session = sessionmaker(bind=engine)

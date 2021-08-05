@@ -1,6 +1,7 @@
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from app.models.faculty import Faculty
+
+from models.faculty import Faculty
 
 engine = create_engine("sqlite:///data.db")
 Session = sessionmaker(bind=engine)
@@ -22,6 +23,15 @@ def get_one_faculty(id: int):
 def post_faculty(name: str):
     faculty_to_add = Faculty(name=name)
     session.add(faculty_to_add)
+    session.commit()
+    session.close()
+    return "success"
+
+
+def post_list_of_faculties(names: list):
+    for name in names:
+        faculty_to_add = Faculty(name=name)
+        session.add(faculty_to_add)
     session.commit()
     session.close()
     return "success"
