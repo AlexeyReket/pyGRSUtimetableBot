@@ -1,61 +1,75 @@
 from fastapi import FastAPI
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
 from validationBodys import *
-from models import *
 import uvicorn
+from servise import user_servises, course_servises, form_servises, group_servises, faculty_servises
 
 app = FastAPI()
-Session = sessionmaker()
-engine = create_engine("sqlite:///data.db", echo=True)
-Session.configure(bind=engine)
-session = Session()
+
+
 """get all requests"""
 
 
 @app.get("/faculties/all")
-def faculty():
-    return session.query(Faculty).all()
+async def faculty():
+    return faculty_servises.get_all_faculties()
 
 
 @app.get("/courses/all")
-def course():
-    return session.query(Course).all()
+async def course():
+    return course_servises.get_all_courses()
 
 
 @app.get("/forms/all")
-def form():
-    return session.query(Form).all()
+async def form():
+    return form_servises.get_all_forms()
+
+
+@app.get("/users/all")
+async def user():
+    return user_servises.get_all_users()
 
 
 @app.get("/groups/all")
-def group():
-    return session.query(StudentGroup).all()
+async def group():
+    return group_servises.get_all_groups("name")
+
+
+@app.get("/groups/sorted")
+async def group(body: GroupBody):
+    return group_servises.get_sorted_groups(body.faculty_id, body.course_id, body.form_id)
+
+
+@app.get("/users/by_tele/{chat_id}")
+async def user(chat_id: int):
+    return user_servises.get_user_by_chat(chat_id)
 
 
 """get one requests"""
 
 
 @app.get("/faculties/{id}")
-def faculty(id):
-    return session.query(Faculty).filter_by(id=id).first()
-
+def faculty(id: int):
+    return faculty_servises.get_one_faculty(id)
 
 
 @app.get("/courses/{id}")
-def course(id):
-    return session.query(Course).filter_by(id=id).first()
+def course(id: int):
+    return course_servises.get_one_course(id)
 
 
 @app.get("/forms/{id}")
-def form(id):
-    return session.query(Form).filter_by(id=id).first()
+def form(id: int):
+    return form_servises.get_one_form(id)
 
 
 @app.get("/groups/{id}")
-def group(id):
-    curGroup = session.query(StudentGroup).filter_by(id=id).first()
-    return curGroup
+def group(id: int):
+    return group_servises.get_one_group(id)
+
+
+@app.get("/users/{id}")
+def user(id: int):
+    return user_servises.get_one_user(id)
 
 
 """post requests"""
@@ -63,63 +77,65 @@ def group(id):
 
 @app.post("/faculties")
 def faculty(body: FacultyBody):
-    faculty_to_add = Faculty(name=body.name)
-    session.add(faculty_to_add)
-    return {"result": "success"}
+    result = faculty_servises.post_faculty(body.name)
+    return {"result": result}
 
 
 @app.post("/courses")
 def course(body: CourseBody):
-    course_to_add = Course(num=body.num)
-    session.add(course_to_add)
-    return {"result": "success"}
+    result = course_servises.post_course(body.num)
+    return {"result": result}
 
 
 @app.post("/forms")
 def form(body: FormBody):
-    form_to_add = Form(type=body.type)
-    session.add(form_to_add)
-    return {"result": "success"}
+    result = form_servises.post_form(body.type)
+    return {"result": result}
 
 
 @app.post("/groups")
 def group(body: GroupBody):
-    group_to_add = StudentGroup(name=body.name, faculty_id=body.faculty_id, course_id=body.course_id,
-                                form_id=body.form_id)
-    session.add(group_to_add)
-    return {"result": "success"}
+    result = group_servises.post_group(body.name, body.faculty_id, body.course_id, body.form_id)
+    return {"result": result}
+
+
+@app.post("/users")
+def user(body: UserBody):
+    result = user_servises.post_user(body.group_id, body.chat_id)
+    return {"result": result}
 
 
 """put requests"""
 
 
 @app.put("/faculties/{id}")
-def faculty(id, body: FacultyBody):
-    session.query(Faculty).filter(Faculty.id == id).update({"name": body.name})
-    session.commit()
-    return {"result": "success"}
+def faculty(id: int, body: FacultyBody):
+    result = faculty_servises.put_faculty(id, body.name)
+    return {"result": result}
 
 
 @app.put("/courses/{id}")
-def course(id, body: CourseBody):
-    session.query(Course).filter(Course.id == id).update({"num": body.num})
-    session.commit()
-    return {"result": "success"}
+def course(id: int, body: CourseBody):
+    result = course_servises.put_course(id, body.num)
+    return {"result": result}
 
 
 @app.put("/forms/{id}")
-def form(id, body: FormBody):
-    session.query(Form).filter(Form.id == id).update({"type": body.type})
-    session.commit()
-    return {"result": "success"}
+def form(id: int, body: FormBody):
+    result = form_servises.put_form(id, body.type)
+    return {"result": result}
 
 
 @app.put("/groups/{id}")
-def group(id, body: GroupBody):
-    session.query(StudentGroup).filter(StudentGroup.id == id). \
-        update({"name": body.name, "faculty_id": body.faculty_id, "course_id": body.course_id, "form_id": body.form_id})
-    session.commit()
-    return {"result": "success"}
+def group(id: int, body: GroupBody):
+    result = group_servises.put_group(id, body.name, body.faculty_id, body.course_id, body.form_id)
+    return {"result": result}
+
+
+@app.put("/users/{id}")
+def user(id: int, body: UserBody):
+    result = user_servises.put_user(id, body.chat_id, body.group_id)
+    return {"result": result}
 
 
 """delete all requests"""
@@ -127,53 +143,71 @@ def group(id, body: GroupBody):
 
 @app.delete("/faculties/all")
 def faculty():
-    session.query(Faculty).delete()
-    return {"result": "success"}
+    result = faculty_servises.delete_all_faculties()
+    return {"result": result}
 
 
 @app.delete("/courses/all")
 def course():
-    session.query(Course).delete()
-    return {"result": "success"}
+    result = course_servises.delete_all_courses()
+    return {"result": result}
 
 
 @app.delete("/forms/all")
 def form():
-    session.query(Form).delete()
-    return {"result": "success"}
+    result = form_servises.delete_all_forms()
+    return {"result": result}
 
 
 @app.delete("/groups/all")
 def group():
-    session.query(StudentGroup).delete()
-    return {"result": "success"}
+    result = group_servises.delete_all_groups()
+    return {"result": result}
+
+
+@app.delete("/users/all")
+def user():
+    result = user_servises.delete_all_users()
+    return {"result": result}
+
+
+@app.delete("/users/sorted")
+def user(body: UserBody):
+    result = user_servises.delete_user_sorted(body.chat_id, body.group_id)
+    return {"result": result}
 
 
 """delete one requests"""
 
 
 @app.delete("/faculties/{id}")
-def faculty(id):
-    session.query(Faculty).filter_by(id=id).delete()
-    return {"result": "success"}
+def faculty(id: int):
+    result = faculty_servises.delete_faculty(id)
+    return {"result": result}
 
 
 @app.delete("/courses/{id}")
-def course(id):
-    session.query(Course).filter_by(id=id).delete()
-    return {"result": "success"}
+def course(id: int):
+    result = course_servises.delete_course(id)
+    return {"result": result}
 
 
 @app.delete("/forms/{id}")
-def form(id):
-    session.query(Form).filter_by(id=id).delete()
-    return {"result": "success"}
+def form(id: int):
+    result = form_servises.delete_form(id)
+    return {"result": result}
 
 
 @app.delete("/groups/{id}")
-def group(id):
-    session.query(StudentGroup).filter_by(id=id).delete()
-    return {"result": "success"}
+def group(id: int):
+    result = group_servises.delete_group(id)
+    return {"result": result}
+
+
+@app.delete("/users/{id}")
+def user(id: int):
+    result = user_servises.delete_user(id)
+    return {"result": result}
 
 
 if __name__ == "__main__":
