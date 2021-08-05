@@ -1,10 +1,10 @@
 from fastapi import FastAPI
-from validationBodys import *
 import uvicorn
-from servise import user_servises, course_servises, form_servises, group_servises, faculty_servises
+
+from app.control.schemas import GroupBody, FacultyBody, CourseBody, FormBody, UserBody
+from app.servise import faculty_servises, course_servises, form_servises, user_servises, group_servises
 
 app = FastAPI()
-
 
 """get all requests"""
 

@@ -1,6 +1,7 @@
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from app.models import StudentGroup
+
+from app.models.student_group import StudentGroup
 
 engine = create_engine("sqlite:///data.db")
 Session = sessionmaker(bind=engine)
@@ -14,7 +15,12 @@ def get_all_groups(mark: str = "id"):
 
 
 def get_sorted_groups(faculty_id: int = None, course_id: int = None, form_id: int = None):
-    groups = session.query(StudentGroup).filter_by(faculty_id=faculty_id, course_id=course_id, form_id=form_id).all()
+    query = session.query(StudentGroup).filter_by(faculty_id=faculty_id)
+    if course_id:
+        groups = query.filter(course_id=course_id)
+    if form_id:
+        groups = query.filter(course_id=course_id)
+
     session.close()
     return groups
 
