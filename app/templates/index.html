@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Панель админа</title>
+</head>
+<style>
+    .modal {
+        position: fixed;
+        margin: 0 auto;
+        top: 50%;
+        left: 50%;
+    }
+</style>
+<body>
+<form action="http://localhost:8000/home/" method="get" class="modal">
+    <label for="login"></label><input type="text" placeholder="login" id="login">
+    <label for="password"></label><input type="text" placeholder="password" id="password">
+    <button type="submit">Готово</button>
+</form>
+</body>
+</html>
